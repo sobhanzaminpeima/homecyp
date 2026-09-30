@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 110" width="420" height="110">
+  <style>
+    .h{font-family:'Poppins','Inter',sans-serif;font-weight:800;font-size:78px;letter-spacing:-3px;}
+  </style>
+  <text x="0" y="80" class="h" fill="#ffffff">home</text>
+  <rect x="232" y="22" width="6" height="64" rx="3" fill="#C9A84C"/>
+  <text x="246" y="80" class="h" fill="#C9A84C">cyp</text>
+</svg>

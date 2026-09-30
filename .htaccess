@@ -1,0 +1,20 @@
+# HomeCyp — cPanel root .htaccess
+# Use this when your domain's document root points at the application root
+# (the folder containing app/, public/, vendor/) instead of public/.
+# It transparently serves everything from the public/ directory.
+#
+# If you instead set the domain's document root directly to .../public,
+# you can delete this file.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Send all requests into public/ without changing the URL
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Block direct access to sensitive files
+<FilesMatch "^(\.env|\.env\..*|composer\.(json|lock)|package(-lock)?\.json|artisan)$">
+    Require all denied
+</FilesMatch>
