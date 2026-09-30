@@ -5,7 +5,8 @@ import { useAuthStore } from '@/stores/auth'
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', name: 'splash', component: () => import('@/views/SplashView.vue') },
+    { path: '/', name: 'ai-chat', component: () => import('@/views/AiChatView.vue') },
+    { path: '/welcome', name: 'splash', component: () => import('@/views/SplashView.vue') },
     { path: '/city', name: 'city-select', component: () => import('@/views/CitySelectView.vue') },
     {
       path: '/home',
@@ -20,7 +21,7 @@ const router = createRouter({
       meta: { needsCity: true },
     },
     { path: '/discover', name: 'discover', component: () => import('@/views/DiscoverView.vue'), meta: { needsCity: true } },
-    { path: '/ai', name: 'ai-chat', component: () => import('@/views/AiChatView.vue') },
+    { path: '/ai', redirect: '/' },
     {
       path: '/business/:slug',
       name: 'business-detail',

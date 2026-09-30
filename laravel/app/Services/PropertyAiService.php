@@ -23,21 +23,27 @@ class PropertyAiService
 
     private function extractFilters(string $message, array $previous): array
     {
-        $text = Str::lower($message);
+        $text = Str::lower($this->normalizeDigits($message));
         $filters = $previous;
-        $daily = ['daily','short stay','holiday','vacation','airbnb','روزانه','کوتاه مدت','günlük','tatil','посуточ','краткоср','יומי'];
-        $rent = ['rent','rental','lease','اجاره','kiralık','kiralama','аренд','השכרה'];
-        $sale = ['buy','purchase','sale','خرید','فروش','satılık','satın','купить','продаж','קנייה','מכירה'];
+        $daily = ['daily','short stay','holiday','vacation','airbnb','روزانه','کوتاه مدت','günlük','tatil','посуточ','краткоср','יומי','يومي','قصيرة الأجل','tagesmiete','ferienwohnung'];
+        $rent = ['rent','rental','lease','اجاره','kiralık','kiralama','аренд','השכרה','إيجار','miete','mieten'];
+        $sale = ['buy','purchase','sale','خرید','فروش','satılık','satın','купить','продаж','קנייה','מכירה','شراء','بيع','kaufen','verkauf'];
         if ($this->contains($text, $daily)) { $filters['listing_type']='rent'; $filters['rental_period']='daily'; }
         elseif ($this->contains($text, $rent)) { $filters['listing_type']='rent'; unset($filters['rental_period']); }
         elseif ($this->contains($text, $sale)) { $filters['listing_type']='sale'; unset($filters['rental_period']); }
 
-        foreach (['villa'=>['villa','ویلا','вилл','וילה'], 'apartment'=>['apartment','flat','آپارتمان','daire','квартир','דירה'], 'land'=>['land','plot','زمین','arsa','земл','קרקע'], 'commercial'=>['commercial','shop','office','تجاری','dükkan','ofis','коммер','משרד']] as $type=>$words) {
+        foreach (['villa'=>['villa','ویلا','вилл','וילה','فيلا'], 'apartment'=>['apartment','flat','آپارتمان','daire','квартир','דירה','شقة','wohnung'], 'land'=>['land','plot','زمین','arsa','земл','קרקע','أرض','grundstück'], 'commercial'=>['commercial','shop','office','تجاری','dükkan','ofis','коммер','משרד','تجاري','gewerbe']] as $type=>$words) {
             if ($this->contains($text,$words)) $filters['property_type']=$type;
         }
 
         if (preg_match('/(?:bed|bedroom|خوابه|اتاق|yatak|спальн|חדר)[^0-9]{0,8}([1-9])|([1-9])[^0-9]{0,5}(?:bed|bedroom|خوابه|اتاق|yatak|спальн|חדר)/u',$text,$m)) $filters['min_bedrooms']=(int)($m[1] ?: $m[2]);
-        if (preg_match('/(?:under|max|budget|up to|زیر|حداکثر|بودجه|altında|bütçe|до)[^0-9]{0,12}([0-9][0-9,.]{2,})/u',$text,$m)) $filters['max_price']=(float)str_replace([',','.'],['',''],$m[1]);
+        if (preg_match('/(?:under|max|budget|up to|زیر|حداکثر|بودجه|تا سقف|altında|bütçe|до|бюджет|أقل من|ميزانية|unter|budget)[^0-9]{0,12}([0-9][0-9,.]*)(?:\s*)(k|thousand|هزار|bin|тысяч|ألف|m|million|میلیون|milyon|миллион|مليون)?/u',$text,$m)) {
+            $amount = (float) str_replace(',', '', $m[1]);
+            $unit = $m[2] ?? '';
+            if (in_array($unit, ['k','thousand','هزار','bin','тысяч','ألف'], true)) $amount *= 1000;
+            if (in_array($unit, ['m','million','میلیون','milyon','миллион','مليون'], true)) $amount *= 1000000;
+            $filters['max_price'] = $amount;
+        }
 
         foreach (City::where('is_active',true)->get() as $city) {
             $names=array_filter([$city->name,$city->name_tr,$city->name_fa,$city->slug]);
@@ -78,10 +84,26 @@ class PropertyAiService
             'tr'=>$count ? "Talebinize uyan {$count} gerçek ilan buldum. Aşağıdaki kartları inceleyin; fiyat ve müsaitliği danışmanla doğrulayın." : 'Henüz tam eşleşme bulamadım. Şehir, bütçe, mülk türü ve satın alma veya kiralama tercihinizi yazın.',
             'ru'=>$count ? "Я нашёл {$count} актуальных вариантов. Посмотрите карточки ниже и уточните цену и доступность у консультанта." : 'Точного совпадения пока нет. Укажите город, бюджет, тип недвижимости и покупку или аренду.',
             'he'=>$count ? "מצאתי {$count} נכסים מתאימים. ניתן לעיין בכרטיסים למטה ולאשר מחיר וזמינות מול היועץ." : 'עדיין לא נמצאה התאמה מדויקת. כתבו עיר, תקציב, סוג נכס והאם מדובר בקנייה או שכירות.',
+            'ar'=>$count ? "وجدت {$count} خيارات متاحة تطابق طلبك. راجع البطاقات أدناه وأكد السعر والتوفر مع المستشار." : 'لم أجد تطابقاً دقيقاً بعد. اذكر المدينة والميزانية ونوع العقار وما إذا كنت تريد الشراء أو الإيجار.',
+            'de'=>$count ? "Ich habe {$count} passende aktuelle Angebote gefunden. Bitte prüfen Sie Preis und Verfügbarkeit mit dem Anbieter." : 'Ich habe noch keinen genauen Treffer. Nennen Sie Stadt, Budget, Immobilientyp und ob Sie kaufen oder mieten möchten.',
             'en'=>$count ? "I found {$count} live options that match your request. Review the cards below and confirm final price and availability with the agent." : 'I could not find an exact match yet. Tell me your preferred city, budget, property type, and whether you want to buy or rent.',
         ];
         return $copy[$locale]??$copy['en'];
     }
 
     private function contains(string $text,array $needles):bool { foreach($needles as $n) if($n!==''&&Str::contains($text,Str::lower($n))) return true; return false; }
+
+    private function normalizeDigits(string $value): string
+    {
+        $value = strtr($value, [
+            '۰'=>'0','۱'=>'1','۲'=>'2','۳'=>'3','۴'=>'4','۵'=>'5','۶'=>'6','۷'=>'7','۸'=>'8','۹'=>'9',
+            '٠'=>'0','١'=>'1','٢'=>'2','٣'=>'3','٤'=>'4','٥'=>'5','٦'=>'6','٧'=>'7','٨'=>'8','٩'=>'9',
+        ]);
+
+        return preg_replace(
+            ['/\bیک\b/u','/\bدو\b/u','/\bسه\b/u','/\bچهار\b/u','/\bپنج\b/u'],
+            ['1','2','3','4','5'],
+            $value,
+        ) ?? $value;
+    }
 }
