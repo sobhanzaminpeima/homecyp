@@ -45,8 +45,8 @@ class Post extends Model implements HasMedia
 
     public function registerMediaConversions(?Media $media = null): void
     {
-        $this->addMediaConversion('thumb')->width(500)->height(350)->nonQueued();
-        $this->addMediaConversion('medium')->width(1000)->height(600)->nonQueued();
+        $this->addMediaConversion('thumb')->width(500)->height(350)->nonOptimized()->nonQueued();
+        $this->addMediaConversion('medium')->width(1000)->height(600)->nonOptimized()->nonQueued();
     }
 
     public function getCoverImageAttribute(): ?string

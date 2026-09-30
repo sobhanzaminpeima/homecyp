@@ -71,8 +71,8 @@ class Property extends Model implements HasMedia
 
     public function registerMediaConversions(?Media $media = null): void
     {
-        $this->addMediaConversion('thumb')->width(400)->height(300)->nonQueued();
-        $this->addMediaConversion('medium')->width(800)->height(600)->nonQueued();
+        $this->addMediaConversion('thumb')->width(400)->height(300)->nonOptimized()->nonQueued();
+        $this->addMediaConversion('medium')->width(800)->height(600)->nonOptimized()->nonQueued();
     }
 
     public function getCoverImageAttribute(): ?string

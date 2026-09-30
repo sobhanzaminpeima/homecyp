@@ -27,6 +27,15 @@ class SeedDemoContent extends Command
             foreach ($project->getMedia('gallery') as $m) {
                 $imagePool[] = $m;
             }
+            foreach ($project->getMedia('cover') as $m) {
+                $imagePool[] = $m;
+            }
+        }
+
+        if (empty($imagePool)) {
+            $this->error('Projects exist, but they have no registered media. Run php artisan media:recover-property-images first.');
+
+            return self::FAILURE;
         }
 
         $regions = ['Kyrenia', 'Esentepe', 'İskele Long Beach', 'Çatalköy', 'Bahçeli', 'Famagusta', 'Bafra', 'Tuzla'];
@@ -140,11 +149,19 @@ class SeedDemoContent extends Command
         $n = count($pool);
         // Cover
         $cover = $pool[$offset % $n];
-        try { $cover->copy($property, 'cover'); } catch (\Throwable $e) {}
+        try {
+            $cover->copy($property, 'cover');
+        } catch (\Throwable $e) {
+            $this->warn("Could not attach a cover to property {$property->id}: {$e->getMessage()}");
+        }
         // Gallery
         for ($k = 0; $k < $count; $k++) {
             $img = $pool[($offset + $k) % $n];
-            try { $img->copy($property, 'gallery'); } catch (\Throwable $e) {}
+            try {
+                $img->copy($property, 'gallery');
+            } catch (\Throwable $e) {
+                $this->warn("Could not attach gallery image {$k} to property {$property->id}: {$e->getMessage()}");
+            }
         }
     }
 
