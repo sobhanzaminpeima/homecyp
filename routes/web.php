@@ -12,6 +12,7 @@ use App\Http\Controllers\InstallerController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SponsorClickController;
+use App\Http\Controllers\LeadPasswordController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
@@ -96,6 +97,9 @@ Route::prefix('agents')->group(function () {
 // Lead / Contact forms
 Route::post('/leads', [LeadController::class, 'store'])->name('leads.store');
 Route::post('/contact', [LeadController::class, 'contact'])->name('contact.send');
+Route::post('/conversation-password/forgot', [LeadPasswordController::class, 'request'])->middleware('throttle:5,1')->name('lead.password.request');
+Route::get('/conversation-password/reset/{token}', [LeadPasswordController::class, 'edit'])->name('lead.password.edit');
+Route::post('/conversation-password/reset', [LeadPasswordController::class, 'update'])->middleware('throttle:5,1')->name('lead.password.update');
 
 // Auth routes (Breeze)
 require __DIR__.'/auth.php';

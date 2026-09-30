@@ -260,6 +260,7 @@
 
                         <button type="submit" class="hc-focusable w-full hc-primary-bg font-medium rounded-xl py-2.5">{{ __('Sign in') }}</button>
                     </form>
+                    <details class="text-sm hc-text-secondary mt-3"><summary class="cursor-pointer">{{ __('Forgot password?') }}</summary><form method="post" action="{{ route('lead.password.request') }}" class="flex gap-2 mt-2">@csrf<input type="email" name="email" required placeholder="{{ __('Email') }}" class="flex-1 min-w-0 rounded-xl border hc-border px-3 py-2" style="background:var(--hc-bg);color:var(--hc-text)"><button class="hc-primary-bg rounded-xl px-3">{{ __('Send link') }}</button></form></details>
                 </div>
             </div>
         @endif

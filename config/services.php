@@ -8,6 +8,10 @@ return [
         'webhook_url' => env('CRM_WEBHOOK_URL'),
         'webhook_token' => env('CRM_WEBHOOK_TOKEN'),
     ],
+    'document_ai' => [
+        'url' => env('DOCUMENT_AI_URL'),
+        'token' => env('DOCUMENT_AI_TOKEN'),
+    ],
 
     /*
     |--------------------------------------------------------------------------

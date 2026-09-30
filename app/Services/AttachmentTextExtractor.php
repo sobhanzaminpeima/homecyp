@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class AttachmentTextExtractor
 {
@@ -21,9 +23,30 @@ class AttachmentTextExtractor
             preg_match_all('/\(([^()]*(?:\\.[^()]*)*)\)\s*Tj/s', $raw, $matches);
             $text = implode(' ', array_map(fn ($value) => stripcslashes($value), $matches[1] ?? []));
             $text = trim(preg_replace('/\s+/u', ' ', $text) ?? '');
-            return $text !== '' ? Str::limit($text, 12000, '') : null;
+            if ($text !== '') {
+                return Str::limit($text, 12000, '');
+            }
         }
 
-        return null;
+        return $this->extractWithDocumentAi($path, $mime);
+    }
+
+    protected function extractWithDocumentAi(string $path, string $mime): ?string
+    {
+        $url = config('services.document_ai.url');
+        if (!$url || !config('services.document_ai.token')) {
+            return null;
+        }
+        try {
+            $response = Http::withToken(config('services.document_ai.token'))
+                ->timeout(20)
+                ->attach('file', file_get_contents($path), basename($path), ['Content-Type' => $mime])
+                ->post($url)->throw();
+            $text = trim((string) ($response->json('text') ?? ''));
+            return $text !== '' ? Str::limit($text, 12000, '') : null;
+        } catch (\Throwable $e) {
+            Log::warning('Document AI extraction failed', ['error' => $e->getMessage()]);
+            return null;
+        }
     }
 }
