@@ -1,0 +1,30 @@
+RewriteEngine On
+
+# Serve the Vue application shell at the site root before Laravel's entry point.
+DirectoryIndex index.html index.php
+
+# Block direct HTTP access to everything under laravel/ except laravel/public/
+RewriteCond %{REQUEST_URI} ^/laravel/(?!public/)
+RewriteRule ^ - [F,L]
+
+# Route API and Sanctum requests to Laravel's entry point
+RewriteCond %{REQUEST_URI} ^/(api|sanctum)/
+RewriteRule ^ index.php [L]
+
+# Serve existing files/directories as-is (Vue's built assets, PWA files, setup.php)
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Everything else falls back to the Vue SPA (client-side routing)
+RewriteRule ^ index.html [L]
+
+# Never cache the SPA shell so deploys/updates show up immediately
+<IfModule mod_headers.c>
+  <FilesMatch "^index\.html$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  </FilesMatch>
+  <FilesMatch "^(sw\.js|manifest\.webmanifest)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  </FilesMatch>
+</IfModule>
