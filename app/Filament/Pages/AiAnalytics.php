@@ -6,6 +6,7 @@ use App\Models\Conversation;
 use App\Models\Message;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\DB;
+use App\Services\InventoryQualityService;
 
 class AiAnalytics extends Page
 {
@@ -74,5 +75,10 @@ class AiAnalytics extends Page
     public function getNegativeFeedbackMessages()
     {
         return Message::where('feedback', -1)->latest()->limit(15)->with('conversation')->get();
+    }
+
+    public function getInventoryHealth(): array
+    {
+        return app(InventoryQualityService::class)->summary();
     }
 }

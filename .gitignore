@@ -27,3 +27,5 @@ Thumbs.db
 database/*.sql
 database/*.sqlite
 storage/installed.lock
+
+*.tar.gz

@@ -5,6 +5,8 @@ return [
     // Overridable at runtime from the admin panel (site_settings: llm_chat_provider, llm_embedding_provider).
     'default_chat_provider' => env('LLM_CHAT_PROVIDER', 'nvidia_nim'),
     'default_embedding_provider' => env('LLM_EMBEDDING_PROVIDER', 'nvidia_nim'),
+    'chat_fallbacks' => array_values(array_filter(explode(',', env('LLM_CHAT_FALLBACKS', 'openai,anthropic')))),
+    'embedding_fallbacks' => array_values(array_filter(explode(',', env('LLM_EMBEDDING_FALLBACKS', 'openai')))),
 
     'providers' => [
         'nvidia_nim' => [

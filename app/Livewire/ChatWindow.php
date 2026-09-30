@@ -164,12 +164,22 @@ class ChatWindow extends Component
             'signInPassword' => 'required|string',
         ]);
 
+        $key = 'lead-signin:'.hash('sha256', mb_strtolower($this->signInIdentifier).'|'.request()->ip());
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $this->addError('signInPassword', __('Too many sign-in attempts. Please wait one minute and try again.'));
+            return;
+        }
+
         $lead = app(LeadCaptureService::class)->attemptSignIn($this->signInIdentifier, $this->signInPassword);
 
         if (!$lead) {
+            RateLimiter::hit($key, 60);
             $this->addError('signInPassword', __('No account found with that phone/email and password.'));
             return;
         }
+
+        RateLimiter::clear($key);
+        request()->session()->regenerate();
 
         $this->leadId = $lead->id;
         session(['homecyp_lead_id' => $lead->id]);
@@ -254,7 +264,7 @@ class ChatWindow extends Component
     public function updatedAttachment(): void
     {
         $this->validate([
-            'attachment' => 'file|mimes:jpg,jpeg,png,webp,pdf|max:10240', // 10MB
+            'attachment' => 'file|mimes:jpg,jpeg,png,webp,pdf,txt,csv,json|max:10240', // 10MB
         ], [], ['attachment' => __('Attach file')]);
     }
 
@@ -313,6 +323,10 @@ class ChatWindow extends Component
                 'path' => $path,
                 'name' => $this->attachment->getClientOriginalName(),
                 'type' => str_starts_with($this->attachment->getMimeType(), 'image/') ? 'image' : 'pdf',
+                'text' => app(\App\Services\AttachmentTextExtractor::class)->extract(
+                    Storage::disk('public')->path($path),
+                    $this->attachment->getMimeType()
+                ),
             ];
             $this->attachment = null;
         }
@@ -341,6 +355,12 @@ class ChatWindow extends Component
         $this->pendingUserMessageId = null;
 
         app(RagPipelineService::class)->respond($conversation, $userMessage);
+
+        $detectedLocale = $conversation->fresh()->locale;
+        if (in_array($detectedLocale, \App\Http\Middleware\SetLocale::SUPPORTED_LOCALES, true)) {
+            session(['locale' => $detectedLocale]);
+            app()->setLocale($detectedLocale);
+        }
 
         $this->loadMessages();
         $this->thinking = false;

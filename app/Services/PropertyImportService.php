@@ -39,7 +39,7 @@ class PropertyImportService
             'location' => $data['location'],
             'region' => $data['region'],
             'currency' => 'GBP',
-            'status' => 'active',
+            'status' => 'draft',
             'is_featured' => false,
             'source_url' => $url,
             'amenities' => $data['amenities'],
@@ -75,7 +75,7 @@ class PropertyImportService
             'slug' => $slug,
             'type' => $type,
             'category' => $category,
-            'status' => 'active',
+            'status' => 'draft',
             'currency' => 'GBP',
             'location' => $data['location'],
             'region' => $data['region'],
@@ -217,22 +217,21 @@ class PropertyImportService
 
     protected function generateShortDescription(string $title, string $location): string
     {
-        return "Discover {$title}, an exclusive development in {$location}. A premium opportunity combining luxury living, modern design, and outstanding investment potential.";
+        return "Review the available information for {$title} in {$location}. Price, availability and legal details must be verified before publication.";
     }
 
     protected function generateDescription(string $title, string $location, array $amenities, string $original): string
     {
         $amenityText = $amenities
-            ? 'Residents enjoy world-class amenities including ' . $this->humanList($amenities) . '.'
-            : 'The development offers a full range of modern amenities for a comfortable lifestyle.';
+            ? 'The source page mentions these amenities: ' . $this->humanList($amenities) . '.'
+            : 'No amenities were reliably detected on the source page.';
 
         $context = $original ? '<p>' . e(Str::limit($original, 300)) . '</p>' : '';
 
         return <<<HTML
 {$context}
-<p>{$title} is a distinguished residential development located in {$location}, one of North Cyprus's most sought-after destinations. Designed for discerning buyers and investors, this project blends contemporary architecture with the natural beauty of the Mediterranean coastline.</p>
-<p>{$amenityText} Whether you are looking for a holiday home, a permanent residence, or a high-yield investment, {$title} offers an exceptional standard of living with strong capital appreciation potential.</p>
-<p>North Cyprus continues to attract international buyers thanks to its affordable prices, high rental yields, and over 300 days of sunshine per year. {$title} represents a rare chance to own a piece of this thriving market.</p>
+<p>{$title} is a property listing in {$location}. This imported draft contains information detected from the source page and must be reviewed by a HomeCyp editor before it is published.</p>
+<p>{$amenityText} Availability, specifications, ownership documentation, payment terms and investment performance require confirmation from the listing agent.</p>
 HTML;
     }
 
@@ -261,23 +260,15 @@ HTML;
 
     protected function generateFaq(string $title, string $location): array
     {
-        return [
-            ['question' => "Where is {$title} located?", 'answer' => "{$title} is located in {$location}, one of the most desirable areas in North Cyprus, offering easy access to beaches, amenities, and transport links."],
-            ['question' => "Can foreigners buy property at {$title}?", 'answer' => "Yes. Foreign nationals can purchase property at {$title} with full legal ownership rights and a registered Title Deed (Koçan)."],
-            ['question' => "What is the investment potential of {$title}?", 'answer' => "Properties in {$location} offer excellent rental yields of 8-12% per year and consistent capital appreciation, making {$title} an attractive investment."],
-            ['question' => "Are payment plans available?", 'answer' => "Yes, flexible payment plans with installments are typically available. Contact HomeCyp for current terms and availability."],
-        ];
+        return [[
+            'question' => "How can I verify the details for {$title}?",
+            'answer' => 'Ask a HomeCyp agent to confirm current availability, price, title documentation, taxes and payment terms before making a decision.',
+        ]];
     }
 
     protected function generateInvestmentBenefits(string $location): array
     {
-        return [
-            "High rental yield potential (8-12% annually)",
-            "Strong capital appreciation in {$location}",
-            "Affordable prices vs. other Mediterranean markets",
-            "Easy purchase process for foreign buyers",
-            "Year-round rental demand from tourism",
-        ];
+        return [];
     }
 
     // ---------- Utilities ----------

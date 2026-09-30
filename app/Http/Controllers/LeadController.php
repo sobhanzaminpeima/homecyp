@@ -38,7 +38,8 @@ class LeadController extends Controller
             'page' => $request->headers->get('referer'),
         ];
 
-        Lead::create($validated);
+        $lead = Lead::create($validated);
+        app(\App\Services\Mcp\CrmWebhookConnector::class)->sync($lead);
 
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'message' => __('Thank you! We will contact you soon.')]);

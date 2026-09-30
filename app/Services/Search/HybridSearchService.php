@@ -63,7 +63,7 @@ class HybridSearchService
     protected function vectorResults(string $query): array
     {
         try {
-            $embedding = $this->llm->embeddingProvider()->embed($query);
+            $embedding = $this->llm->embed($query);
         } catch (\Throwable $e) {
             report($e);
             return [];

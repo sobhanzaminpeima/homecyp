@@ -1,6 +1,13 @@
 <?php
 
 return [
+    'whatsapp' => [
+        'number' => env('WHATSAPP_NUMBER', '905338456497'),
+    ],
+    'crm' => [
+        'webhook_url' => env('CRM_WEBHOOK_URL'),
+        'webhook_token' => env('CRM_WEBHOOK_TOKEN'),
+    ],
 
     /*
     |--------------------------------------------------------------------------

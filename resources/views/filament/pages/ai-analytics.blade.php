@@ -1,5 +1,17 @@
 <x-filament-panels::page>
     @php $stats = $this->getStats(); @endphp
+    @php $inventory = $this->getInventoryHealth(); @endphp
+
+    <div class="p-4 bg-white rounded-xl border mb-6">
+        <div class="flex items-center justify-between gap-4">
+            <div><p class="font-medium">Property inventory quality</p><p class="text-xs text-gray-500">Only complete, current listings produce reliable AI recommendations.</p></div>
+            <p class="text-2xl font-semibold">{{ $inventory['quality_percent'] }}%</p>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 text-sm">
+            <div>Active: <b>{{ $inventory['active'] }}</b></div><div>Complete: <b>{{ $inventory['complete'] }}</b></div>
+            <div>Missing price: <b>{{ $inventory['missing_price'] }}</b></div><div>Without images: <b>{{ $inventory['without_images'] }}</b></div>
+        </div>
+    </div>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="p-4 bg-white rounded-xl border">

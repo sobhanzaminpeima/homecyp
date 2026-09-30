@@ -77,6 +77,7 @@ class LeadCaptureService
         ]);
 
         $conversation->update(['lead_id' => $lead->id]);
+        app(\App\Services\Mcp\CrmWebhookConnector::class)->sync($lead);
 
         return $lead;
     }

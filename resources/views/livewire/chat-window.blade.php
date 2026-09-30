@@ -123,11 +123,12 @@
             @endforeach
 
             @if($thinking)
-                <div class="max-w-3xl mx-auto flex items-start gap-3">
+                <div class="max-w-3xl mx-auto flex items-start gap-3" x-data="{ step: 0, timer: null }" x-init="timer=setInterval(()=>step=(step+1)%3,2200)" x-on:reply-received.window="clearInterval(timer)">
                     <span class="w-8 h-8 rounded-xl hc-primary-bg flex items-center justify-center shrink-0"><x-chat.icon name="sparkles" :size="14" /></span>
                     <div class="hc-surface border hc-border px-4 py-3 inline-flex gap-1" style="border-radius: var(--hc-radius-bubble) var(--hc-radius-bubble) var(--hc-radius-bubble) 6px;">
                         <span class="hc-typing-dot"></span><span class="hc-typing-dot"></span><span class="hc-typing-dot"></span>
                     </div>
+                    <span class="text-xs hc-text-secondary pt-3" x-text="[@js(__('Understanding your request…')),@js(__('Searching verified listings…')),@js(__('Preparing a helpful answer…'))][step]"></span>
                 </div>
             @endif
         </main>
@@ -179,6 +180,7 @@
                     </button>
                 </form>
                 <p class="text-center text-[11px] hc-text-secondary mt-2">{{ __('AI can make mistakes. Verify legal and financial details with a qualified professional.') }}</p>
+                <p class="text-center mt-2"><a class="text-xs font-semibold hc-accent-text hover:underline" target="_blank" rel="noopener" href="https://wa.me/{{ preg_replace('/\D+/', '', config('services.whatsapp.number')) }}?text={{ urlencode(__('Hello HomeCyp, I need help finding a property in North Cyprus.')) }}">{{ __('Talk to a property advisor on WhatsApp') }}</a></p>
             </div>
         </div>
 

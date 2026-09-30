@@ -13,6 +13,8 @@ use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SponsorClickController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 // Web installer (cPanel without terminal) — self-locks after first run
 Route::get('/install', [InstallerController::class, 'index'])->name('installer.index');
@@ -21,6 +23,16 @@ Route::get('/install/done', [InstallerController::class, 'done'])->name('install
 
 // SEO
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/healthz', function () {
+    try {
+        DB::select('select 1');
+        Cache::put('healthz', now()->timestamp, 10);
+        return response()->json(['status' => 'ok', 'database' => 'ok', 'cache' => Cache::get('healthz') ? 'ok' : 'degraded']);
+    } catch (\Throwable $e) {
+        report($e);
+        return response()->json(['status' => 'degraded'], 503);
+    }
+})->middleware('throttle:30,1')->name('health');
 
 // Language switcher
 Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
@@ -55,6 +67,7 @@ Route::prefix('projects')->group(function () {
 
 // Resale
 Route::get('/resale', [PropertyController::class, 'resale'])->name('resale.index');
+Route::get('/areas/{area}', [PropertyController::class, 'area'])->name('properties.area');
 
 // Daily Rentals
 Route::prefix('daily-rentals')->group(function () {

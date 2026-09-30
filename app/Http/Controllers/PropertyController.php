@@ -7,6 +7,20 @@ use Illuminate\Http\Request;
 
 class PropertyController extends Controller
 {
+    private const SEO_AREAS = [
+        'kyrenia' => 'Kyrenia', 'iskele' => 'Iskele', 'famagusta' => 'Famagusta', 'nicosia' => 'Nicosia',
+    ];
+
+    public function area(string $area)
+    {
+        abort_unless(isset(self::SEO_AREAS[$area]), 404);
+        $region = self::SEO_AREAS[$area];
+        $properties = Property::active()->where('region', 'like', "%{$region}%")
+            ->with('translations')->latest()->paginate(12);
+
+        return view('properties.area', compact('area', 'region', 'properties'));
+    }
+
     public function index(Request $request)
     {
         $query = Property::active()->with('translations');

@@ -5,12 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="{{ __('Find, buy, sell or rent property in North Cyprus with a multilingual AI real estate advisor.') }}">
+    <link rel="canonical" href="{{ url('/') }}">
+    <meta property="og:title" content="HomeCyp AI — {{ __('North Cyprus property advisor') }}">
+    <meta property="og:description" content="{{ __('Find, buy, sell or rent property in North Cyprus with a multilingual AI real estate advisor.') }}">
+    <meta property="og:url" content="{{ url('/') }}">
+    <meta property="og:type" content="website">
     <title>HomeCyp AI — {{ __('North Cyprus property advisor') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css'])
     @livewireStyles
+    <script type="application/ld+json">{!! json_encode(['@context' => 'https://schema.org', '@type' => 'WebApplication', 'name' => 'HomeCyp AI', 'url' => url('/'), 'applicationCategory' => 'RealEstateApplication', 'availableLanguage' => ['English','Turkish','Persian','Arabic','Russian','German']], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>
     <style>
         :root { --hc-bg:#f7f8f6;--hc-surface:#fff;--hc-sidebar:#f0f2ef;--hc-primary:#123f3b;--hc-primary-hover:#0b312e;--hc-primary-contrast:#fff;--hc-accent:#d7a94b;--hc-accent-soft:#fbf3df;--hc-coral:#d85f45;--hc-text:#18211f;--hc-text-secondary:#65716d;--hc-muted:#8b9591;--hc-border:#dde2de;--hc-input:#fff;--hc-hover:#e7ebe7;--hc-focus-ring:rgba(18,63,59,.22);--hc-shadow:0 16px 50px rgba(18,43,39,.08);--font-display:'Manrope','Noto Sans Arabic',sans-serif;--font-body:'DM Sans','Noto Sans Arabic',sans-serif }
         html.dark { --hc-bg:#111715;--hc-surface:#19201e;--hc-sidebar:#151b19;--hc-primary:#d8b768;--hc-primary-hover:#e2c57e;--hc-primary-contrast:#17201d;--hc-accent:#e1bb67;--hc-accent-soft:#302a1d;--hc-coral:#ef826b;--hc-text:#edf1ee;--hc-text-secondary:#aeb9b5;--hc-muted:#7d8985;--hc-border:#2b3532;--hc-input:#202825;--hc-hover:#26302d;--hc-focus-ring:rgba(225,187,103,.3);--hc-shadow:0 18px 60px rgba(0,0,0,.3) }

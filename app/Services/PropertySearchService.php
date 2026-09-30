@@ -57,6 +57,11 @@ class PropertySearchService
             // purchased. Without this guard, a broad investment query could rank
             // nightly Airbnb inventory ahead of projects and resale listings.
             $query->whereIn('category', ['project', 'resale']);
+        } elseif ($intent === 'property_search' && ($filters['budget_max'] ?? 0) >= 10000) {
+            // A five-figure property budget is a purchase signal even when the
+            // visitor omits the word "buy". Keep nightly/monthly rentals out of
+            // those results so prices with different units are never compared.
+            $query->whereIn('category', ['project', 'resale']);
         }
 
         if ($filters['region']) {
@@ -147,14 +152,10 @@ class PropertySearchService
 
         $budgetMax = null;
         $normalizedForNumbers = $this->normalizeDigits($lower);
-        if (preg_match('/(?:budget|have|afford|under|below|up to|max(?:imum)?|بودجه|تا سقف|زیر|bütçe|altında|бюджет|до|budget|unter)\D{0,12}(?:£|\$|€)?\s*([\d,]+(?:\.\d+)?)\s*(k|thousand|m|million|هزار|میلیون|bin|milyon)?/u', $normalizedForNumbers, $m)) {
-            $amount = (float) str_replace(',', '', $m[1]);
-            $unit = $m[2] ?? '';
-            $budgetMax = match (true) {
-                in_array($unit, ['k', 'thousand', 'هزار', 'bin'], true) => $amount * 1000,
-                in_array($unit, ['m', 'million', 'میلیون', 'milyon'], true) => $amount * 1_000_000,
-                default => $amount,
-            };
+        if (preg_match('/(?:between|from|بین)\D{0,8}(?:£|\$|€)?\s*([\d,]+(?:\.\d+)?)\s*(k|thousand|m|million|هزار|میلیون|bin|milyon)?\D{0,12}(?:and|to|تا|الی|و)\D{0,5}(?:£|\$|€)?\s*([\d,]+(?:\.\d+)?)\s*(k|thousand|m|million|هزار|میلیون|bin|milyon)?/u', $normalizedForNumbers, $range)) {
+            $budgetMax = $this->scaledAmount($range[3], $range[4] ?? $range[2] ?? '');
+        } elseif (preg_match('/(?:budget|have|afford|under|below|up to|max(?:imum)?|around|about|approximately|بودجه|تا سقف|زیر|حدود|تقریباً|تقریبا|bütçe|altında|yaklaşık|бюджет|до|около|unter|etwa)\D{0,12}(?:£|\$|€)?\s*([\d,]+(?:\.\d+)?)\s*(k|thousand|m|million|هزار|میلیون|bin|milyon)?/u', $normalizedForNumbers, $m)) {
+            $budgetMax = $this->scaledAmount($m[1], $m[2] ?? '');
         }
 
         return [
@@ -163,6 +164,16 @@ class PropertySearchService
             'bedrooms' => $bedrooms,
             'budget_max' => $budgetMax,
         ];
+    }
+
+    protected function scaledAmount(string $number, string $unit): float
+    {
+        $amount = (float) str_replace(',', '', $number);
+        return match (true) {
+            in_array($unit, ['k', 'thousand', 'هزار', 'bin'], true) => $amount * 1000,
+            in_array($unit, ['m', 'million', 'میلیون', 'milyon'], true) => $amount * 1_000_000,
+            default => $amount,
+        };
     }
 
     protected function normalizeDigits(string $value): string

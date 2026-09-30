@@ -48,6 +48,7 @@ class RagPipelineService
             'attachment_path' => $attachment['path'] ?? null,
             'attachment_name' => $attachment['name'] ?? null,
             'attachment_type' => $attachment['type'] ?? null,
+            'attachment_text' => $attachment['text'] ?? null,
         ]);
     }
 
@@ -63,8 +64,15 @@ class RagPipelineService
 
         $intent = $this->detectIntent($userText);
         $context = $this->search->search($userText);
+        $known = $conversation->memory ?? [];
+        $searchText = trim($userText.' '.implode(' ', array_filter([
+            $known['area'] ?? null,
+            isset($known['budget']) ? 'budget '.$known['budget'] : null,
+            isset($known['bedrooms']) ? $known['bedrooms'].' bedroom' : null,
+            $known['purpose'] ?? null,
+        ])));
         $matchedProperties = in_array($intent, self::PROPERTY_INTENTS, true)
-            ? $this->properties->search($userText, 6, $intent)
+            ? $this->properties->search($searchText, 6, $intent)
             : collect();
 
         // Spec section 6: the AI's reply language always follows the language the
@@ -75,12 +83,20 @@ class RagPipelineService
             $conversation->update(['locale' => $detectedLanguage]);
         }
 
+        $deterministicFacts = $this->factsFromMessage($userText, $intent);
+        if ($deterministicFacts) {
+            $conversation->update(['memory' => array_merge($conversation->memory ?? [], $deterministicFacts)]);
+        }
+
         $history = $conversation->messages()
             ->latest()
             ->take(10)
             ->get()
             ->reverse()
-            ->map(fn (Message $m) => ['role' => $m->role, 'content' => $m->content])
+            ->map(fn (Message $m) => [
+                'role' => $m->role,
+                'content' => $m->content.($m->attachment_text ? "\n\nVerified text extracted from the attached file:\n".$m->attachment_text : ''),
+            ])
             ->values()
             ->all();
 
@@ -222,6 +238,19 @@ class RagPipelineService
         };
     }
 
+    protected function factsFromMessage(string $text, string $intent): array
+    {
+        $filters = $this->properties->extractFilters($text);
+        $facts = array_filter([
+            'budget' => $filters['budget_max'],
+            'area' => $filters['region'],
+            'bedrooms' => $filters['bedrooms'],
+            'purpose' => $intent === 'investment' ? 'investment' : null,
+        ], fn ($value) => $value !== null && $value !== '');
+
+        return $facts;
+    }
+
     /**
      * Deterministic tool widgets, never LLM-computed math or invented legal facts.
      * Returns null when the intent isn't tool-related, or when a tool needs more
@@ -353,7 +382,7 @@ PROMPT;
     protected function callLlm(array $messages, string $language = 'en'): array
     {
         try {
-            $raw = $this->llm->chatProvider()->chat($messages, ['response_format' => 'json']);
+            $raw = $this->llm->chat($messages, ['response_format' => 'json']);
             $decoded = json_decode($raw, true);
 
             if (is_array($decoded) && isset($decoded['answer'])) {
