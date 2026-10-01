@@ -28,15 +28,14 @@
             <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-left">
                 <p class="text-sm text-amber-800 font-semibold mb-1">⚠ Important — secure your site:</p>
                 <ul class="text-sm text-amber-700 list-disc list-inside space-y-1">
-                    <li>Log in and change the default admin password immediately.</li>
+                    <li>Log in with the administrator credentials configured in <code>.env</code> and rotate the bootstrap password.</li>
                     <li>The installer is now locked. Delete <code>storage/installed.lock</code> only if you need to re-run it.</li>
                 </ul>
             </div>
 
             <div class="bg-gray-50 rounded-xl p-4 mb-6 text-left">
                 <p class="text-sm text-gray-600 mb-1"><strong>Admin Panel:</strong> <a href="/admin" class="text-yellow-600">/admin</a></p>
-                <p class="text-sm text-gray-600 mb-1"><strong>Default email:</strong> admin@homecyp.com</p>
-                <p class="text-sm text-gray-600"><strong>Default password:</strong> HomeCyp@2024! <span class="text-red-500">(change this!)</span></p>
+                <p class="text-sm text-gray-600"><strong>Credentials:</strong> use <code>ADMIN_EMAIL</code> and <code>ADMIN_PASSWORD</code> from the server environment.</p>
             </div>
 
             <div class="flex gap-3">

@@ -1,59 +1,145 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# HomeCyp
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+[HomeCyp](https://homecyp.com) is a multilingual AI real-estate platform for North Cyprus. The root page is a full-screen conversational property advisor; the application also provides searchable listings, projects, resale properties, rentals, editorial content, lead capture, and a Filament administration panel.
 
-## About Laravel
+## Product capabilities
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Multilingual chat and UI in English, Turkish, Persian, Arabic, Russian, and German.
+- Automatic language detection with RTL support for Persian and Arabic.
+- Natural-language property search by budget, range, area, bedrooms, category, and intent.
+- Verified database-backed property cards; the assistant cannot invent listing IDs.
+- Purchase, resale, investment, daily rental, long-term rental, and Airbnb discovery.
+- Conversation memory, saved history, lead sign-in, and password recovery.
+- Deterministic ROI, mortgage, comparison, timeline, area, and residency tools.
+- Knowledge-base RAG with cached embeddings and hybrid search.
+- NVIDIA NIM, OpenAI, and Anthropic support with failover and circuit breaking.
+- Image/PDF/text attachments, optional OCR/Document AI, and voice input/output.
+- Viewing requests, email workflows, WhatsApp handoff, and optional CRM webhooks.
+- Admin-managed inventory, imports, branding, chat, LLM settings, analytics, and SEO.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+See [AI chat documentation](docs/AI_CHAT.md) for the full request flow and guardrails.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Technology
 
-## Learning Laravel
+| Layer | Technology |
+| --- | --- |
+| Application | PHP 8.2+, Laravel 12 |
+| Interactive UI | Livewire 3, Alpine.js, Tailwind CSS 4 |
+| Admin | Filament 3 |
+| Database | MySQL in production, SQLite for tests |
+| Media | Spatie Media Library, GD/Imagick |
+| Frontend build | Vite 7, Node.js 22 recommended |
+| AI providers | NVIDIA NIM, OpenAI, Anthropic |
+| CI | GitHub Actions, PHPUnit, Vite build |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Quick start
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Requirements: PHP 8.2+, Composer 2, Node.js 20+, npm, and MySQL or SQLite.
 
-## Laravel Sponsors
+```bash
+git clone https://github.com/sobhanzaminpeima/homecyp.git
+cd homecyp
+composer install
+cp .env.example .env
+php artisan key:generate
+touch database/database.sqlite
+php artisan migrate --seed
+npm install
+npm run build
+php artisan storage:link
+php artisan serve
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+On Windows, create the SQLite file with PowerShell if `touch` is unavailable:
 
-### Premium Partners
+```powershell
+New-Item database/database.sqlite -ItemType File -Force
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Open `http://127.0.0.1:8000`. The admin panel is at `/admin`.
 
-## Contributing
+Set initial admin values in `.env` before seeding:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```dotenv
+ADMIN_NAME="HomeCyp Admin"
+ADMIN_EMAIL=admin@example.test
+ADMIN_PASSWORD=choose-a-strong-password
+```
 
-## Code of Conduct
+No production password or API key is committed to this repository.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## AI configuration
 
-## Security Vulnerabilities
+Configure at least one provider. The default is NVIDIA NIM:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```dotenv
+LLM_CHAT_PROVIDER=nvidia_nim
+LLM_EMBEDDING_PROVIDER=nvidia_nim
+LLM_CHAT_FALLBACKS=openai,anthropic
+LLM_EMBEDDING_FALLBACKS=openai
+
+NVIDIA_NIM_API_KEY=
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+```
+
+The active provider can also be changed in **Admin → AI → LLM Settings**. Optional integrations:
+
+```dotenv
+WHATSAPP_NUMBER=905338456497
+CRM_WEBHOOK_URL=
+CRM_WEBHOOK_TOKEN=
+DOCUMENT_AI_URL=
+DOCUMENT_AI_TOKEN=
+```
+
+See [.env.production.example](.env.production.example) for the full template.
+
+## Useful commands
+
+```bash
+php artisan migrate --force
+php artisan db:seed --force
+php artisan storage:link
+php artisan optimize:clear
+php artisan view:cache
+php artisan media-library:regenerate --only-missing
+php artisan media:recover-property-images
+php vendor/phpunit/phpunit/phpunit
+npm run build
+```
+
+`media:recover-property-images` repairs missing media records from images already on the public disk. It is a recovery tool, not a routine importer.
+
+## Tests and CI
+
+```bash
+php artisan migrate --force
+php vendor/phpunit/phpunit/phpunit
+npm ci
+npm run build
+```
+
+GitHub Actions runs migrations, PHPUnit, and a production frontend build on every push and pull request. Some shared hosts disable `proc_open`; run PHPUnit directly there instead of `php artisan test`.
+
+## Documentation
+
+- [Deployment](DEPLOYMENT.md)
+- [AI chat and integrations](docs/AI_CHAT.md)
+- [Architecture and data flow](docs/ARCHITECTURE.md)
+- [Operations and troubleshooting](docs/OPERATIONS.md)
+- [Security](SECURITY.md)
+- [Contributing](CONTRIBUTING.md)
+- [Changelog](CHANGELOG.md)
+
+## Production endpoints
+
+- Application: <https://homecyp.com>
+- Listings: <https://homecyp.com/listings>
+- Health: <https://homecyp.com/healthz>
+- Sitemap: <https://homecyp.com/sitemap.xml>
+- Admin: `/admin`
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This repository is proprietary to HomeCyp unless the owner provides a separate license. Third-party dependencies retain their respective licenses.

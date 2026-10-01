@@ -10,11 +10,18 @@ class AdminSeeder extends Seeder
 {
     public function run(): void
     {
+        $email = env('ADMIN_EMAIL', 'admin@example.test');
+        $password = env('ADMIN_PASSWORD');
+
+        if (blank($password) && app()->environment('production')) {
+            throw new \RuntimeException('ADMIN_PASSWORD must be set before seeding production.');
+        }
+
         $admin = User::firstOrCreate(
-            ['email' => 'admin@homecyp.com'],
+            ['email' => $email],
             [
-                'name' => 'HomeCyp Admin',
-                'password' => Hash::make('HomeCyp@2024!'),
+                'name' => env('ADMIN_NAME', 'HomeCyp Admin'),
+                'password' => Hash::make($password ?: 'password'),
                 'email_verified_at' => now(),
             ]
         );
