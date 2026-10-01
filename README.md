@@ -124,6 +124,8 @@ GitHub Actions runs migrations, PHPUnit, and a production frontend build on ever
 
 ## Documentation
 
+- [Documentation index](docs/README.md)
+
 - [Deployment](DEPLOYMENT.md)
 - [AI chat and integrations](docs/AI_CHAT.md)
 - [Architecture and data flow](docs/ARCHITECTURE.md)
