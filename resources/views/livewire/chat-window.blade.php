@@ -34,7 +34,8 @@
             </button>
         </header>
 
-        <main x-ref="log" role="log" aria-live="polite" class="flex-1 overflow-y-auto px-4 py-6 md:py-8 space-y-7">
+        <main x-ref="log" role="log" aria-live="polite"
+              class="flex-1 px-4 space-y-7 {{ empty($messages) ? 'overflow-hidden py-3 md:py-4' : 'overflow-y-auto py-6 md:py-8' }}">
             @if(empty($messages))
                 @php
                     $welcomeTitle = $welcomeVariant['title'] ?? \App\Models\SiteSetting::get('chat_welcome_title', 'Your AI Real Estate Expert for North Cyprus');
@@ -47,17 +48,21 @@
                         ['emoji' => 'sparkles', 'label' => __('Get a local recommendation'), 'prompt' => __('Help me choose the right area in North Cyprus')],
                     ];
                 @endphp
-                <div class="max-w-3xl mx-auto pt-[7vh] pb-10 hc-fade-rise">
+                <div class="max-w-3xl mx-auto h-full flex flex-col justify-center hc-empty-state hc-fade-rise">
                     <div class="text-center max-w-2xl mx-auto">
                         <div class="w-12 h-12 rounded-2xl hc-primary-bg flex items-center justify-center mx-auto mb-5 hc-shadow"><x-chat.icon name="sparkles" :size="22" /></div>
                         <p class="text-xs font-bold uppercase tracking-[.16em] hc-accent-text mb-3">HomeCyp AI</p>
-                        <h1 class="hc-font-display text-3xl md:text-4xl font-bold leading-tight" style="color:var(--hc-text)">{{ $welcomeTitle }}</h1>
-                        <p class="hc-text-secondary mt-3 text-base md:text-lg leading-relaxed">{{ $welcomeSubtitle }}</p>
+                        <h1 class="hc-font-display text-3xl md:text-4xl font-bold leading-tight" style="color:var(--hc-text)">{{ __($welcomeTitle) }}</h1>
+                        <p class="hc-text-secondary mt-3 text-base md:text-lg leading-relaxed">{{ __($welcomeSubtitle) }}</p>
                         <div class="inline-flex items-center gap-2 mt-4 text-xs hc-text-secondary rounded-full border hc-border px-3 py-1.5" style="background:var(--hc-surface)"><span>🌐</span>{{ __('Ask in your own language') }}</div>
                     </div>
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-9">
                         @foreach($cards as $card)
-                            <button type="button" wire:click="startWithPrompt('{{ addslashes($card['prompt']) }}')" class="hc-suggestion-card hc-focusable"><span class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:var(--hc-accent-soft);color:var(--hc-accent)"><x-chat.icon :name="$card['emoji']" :size="18" /></span><span class="text-sm font-semibold leading-snug">{{ $card['label'] }}</span></button>
+                            @php
+                                $localizedLabel = __($card['label']);
+                                $localizedPrompt = __($card['prompt']);
+                            @endphp
+                            <button type="button" wire:click="startWithPrompt('{{ addslashes($localizedPrompt) }}')" class="hc-suggestion-card hc-focusable"><span class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:var(--hc-accent-soft);color:var(--hc-accent)"><x-chat.icon :name="$card['emoji']" :size="18" /></span><span class="text-sm font-semibold leading-snug">{{ $localizedLabel }}</span></button>
                         @endforeach
                     </div>
                 </div>
